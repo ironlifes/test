@@ -6,25 +6,31 @@ import java.util.Scanner;
 
 //操作类
 public class Operator {
-    private ArrayList<Account> accounts=new ArrayList<>();
+    private ArrayList<Account> accounts=new ArrayList<>();//储存账号信息
+    private ArrayList<Crowdfunding> crowdfundings=new ArrayList<>();//储存众筹者信息
     private Scanner sc=new Scanner(System.in);
-    private Account loginAcc;
+    private Account loginAcc;//定义变量作为登录者
     public void start(){
         while (true) {
             System.out.println("==欢迎进入众筹系统==");
             System.out.println("1、登录");
             System.out.println("2、注册");
+            System.out.println("3、退出系统");
             System.out.println("请选择：");
             int command=sc.nextInt();
             switch (command){
                 case 1:
-
+                    login();
                     break;
                 case 2:
                     registerAccount();
                     break;
+                case 3:
+                    System.out.println("退出成功~");
+                    return;
                 default:
-                    System.out.println("没有该操作~");
+                    System.out.println("输入有误，请重新输入~");
+                    break;
             }
         }
     }
@@ -62,16 +68,17 @@ public class Operator {
 
         accounts.add(acc);
         System.out.println("恭喜您注册成功，您的账号是："+acc.getCardId());
+        System.out.println("您的初始余额是1000.0元~");
     }
 
 //获取账号
     private String createCardId() {
         while (true) {
             String cardId = "";
-            Random r = new Random();
+            Random r = new Random();//获取随机数
             for (int i = 0; i < 8; i++) {
                 int n = r.nextInt(10);
-                cardId += n;
+                cardId += n;//将随机数连接起来
             }
             Account acc = getAccountCardId(cardId);
             if (acc == null) {
@@ -94,13 +101,22 @@ public class Operator {
 //登录界面
     private void login(){
         System.out.println("==用户登录==");
+        //验证系统中是否有账号
+        if(accounts.size()==0){
+            System.out.println("系统中不存在账号，请先注册~");
+            return;
+        }
+
         while (true) {
             System.out.println("请输入您的账号：");
             String cardId=sc.next();
             Account acc=getAccountCardId(cardId);
+
             if(acc==null){
                 System.out.println("您输入的账号不存在，请重新输入：");
-            }else{
+                break;
+            }
+            else{
                 while (true) {
                     System.out.println("请输入您的密码：");
                     String passWord=sc.next();
@@ -108,6 +124,7 @@ public class Operator {
                         System.out.println("登录成功~");
                         loginAcc=acc;
                         showUserCommand();
+                        return;
                     }else{
                         System.out.println("密码错误，请重新输入~");
                     }
@@ -118,26 +135,35 @@ public class Operator {
 
 //登录成功界面
     private void showUserCommand(){
-        System.out.println("您可以进行以下操作：");
-        System.out.println("1、查询余额");
-        System.out.println("2、发起众筹");
-        System.out.println("3、查看其他众筹信息");
-        System.out.println("4、修改个人信息");
-        System.out.println("请选择：");
-        int command=sc.nextInt();
-        switch (command){
-            case 1:
-                System.out.println("您的余额为："+loginAcc.getMoney());
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-            case 4:
-                update();
-                break;
-            default:
-
+        while (true) {
+            System.out.println("您可以进行以下操作：");
+            System.out.println("1、查询余额");
+            System.out.println("2、发起众筹");
+            System.out.println("3、查看其他众筹信息");
+            System.out.println("4、修改个人信息");
+            System.out.println("5、退出登录");
+            System.out.println("请选择：");
+            int command=sc.nextInt();
+            switch (command){
+                case 1:
+                    System.out.println("您的余额为："+loginAcc.getMoney());
+                    break;
+                case 2:
+                    launchCrowdfunding();
+                    break;
+                case 3:
+                    searchCrowdfunding();
+                    break;
+                case 4:
+                    update();
+                    break;
+                case 5:
+                    System.out.println("退出成功~");
+                    return;
+                default:
+                    System.out.println("输入有误，请重新输入~");
+                    break;
+            }
         }
     }
 
@@ -159,6 +185,8 @@ public class Operator {
                 updateIntroduction();
                 break;
             default:
+                System.out.println("输入有误，请重新输入~");
+                break;
         }
     }
 
@@ -184,5 +212,95 @@ public class Operator {
         String introduction=sc.next();
         loginAcc.setIntroduction(introduction);
         System.out.println("修改成功~");
+    }
+
+//发起众筹
+    private void launchCrowdfunding(){
+        Crowdfunding cro=new Crowdfunding();
+
+        cro.setCardId(loginAcc.getCardId());
+
+        System.out.println("请输入众筹发起者的姓名：");
+        cro.setName(sc.next());
+
+        System.out.println("请输入众筹发起者的年龄：");
+        cro.setAge(sc.nextInt());
+
+        System.out.println("请输入众筹发起者的性别：");
+        cro.setSex(sc.next());
+
+        System.out.println("请输入众筹发起的原因：");
+        cro.setReason(sc.next());
+
+        System.out.println("请输入众筹的金额：");
+        cro.setMoney(sc.nextDouble());
+
+        crowdfundings.add(cro);
+    }
+
+//查看他人众筹信息
+    private void searchCrowdfunding(){
+        System.out.println("各众筹信息如下：");
+        for (int i = 0; i < crowdfundings.size(); i++) {
+            Crowdfunding cro=crowdfundings.get(i);
+            System.out.println("账号："+cro.getCardId());
+            System.out.println("姓名："+cro.getName());
+            System.out.println("年龄："+cro.getAge());
+            System.out.println("性别："+cro.getSex());
+            System.out.println("众筹原因："+cro.getReason());
+            System.out.println("众筹金额："+cro.getMoney());
+            System.out.println();
+        }
+        while (true) {
+            System.out.println("请问您是否要进行捐款？");
+            System.out.println("请回答是或否：");
+            String command=sc.next();
+            switch (command){
+                case "是":
+                    donate();
+                    return;
+                case "否":
+                    return;
+                default:
+                    System.out.println("输入有误，请重新输入~");
+                    break;
+            }
+        }
+    }
+//向他人捐款
+    private void donate(){
+        System.out.println("请选择捐款对象的账号：");
+        String cardId=sc.next();
+
+        for (int i = 0; i < crowdfundings.size(); i++) {
+            Crowdfunding cro=crowdfundings.get(i);
+            //遍历crowdfundings集合寻找捐款对象
+            if(cro.getCardId().equals(cardId)){
+                while (true) {
+                    System.out.println("请输入捐款金额：");
+                    double money=sc.nextDouble();
+                    //确保余额充足
+                    if(loginAcc.getMoney()-money>=0){
+                        //更新当期账号余额
+                        loginAcc.setMoney(loginAcc.getMoney()-money);
+                        for (int i1 = 0; i1 < accounts.size(); i1++) {
+                            Account acc=accounts.get(i);
+                            //遍历accounts集合寻找捐款对象
+                            if(acc.getCardId().equals(cardId)){
+                                //更新捐款对象的余额
+                                acc.setMoney(acc.getMoney()+money);
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    else{
+                        System.out.println("您的余额不足，请重新输入~");
+                    }
+                }
+            }
+            break;
+        }
+        System.out.println("捐款成功~");
     }
 }
