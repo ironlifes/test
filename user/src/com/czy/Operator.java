@@ -1,5 +1,6 @@
 package com.czy;
 
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -10,7 +11,7 @@ public class Operator {
     private ArrayList<Crowdfunding> crowdfundings=new ArrayList<>();//储存众筹者信息
     private Scanner sc=new Scanner(System.in);
     private Account loginAcc;//定义变量作为登录者
-    public void start(){
+    public void start() throws SQLException {
         while (true) {
             System.out.println("==欢迎进入众筹系统==");
             System.out.println("1、登录");
@@ -36,7 +37,7 @@ public class Operator {
     }
 
 //注册界面
-    private void registerAccount(){
+    private void registerAccount() throws SQLException {
         System.out.println("==用户注册==");
 
         Account acc=new Account();
@@ -56,19 +57,34 @@ public class Operator {
             String okPassWord=sc.next();
             if(passWord.equals(okPassWord)){
                 acc.setPassWord(passWord);
+                acc.setCardId(createCardId());
+                acc.setMoney(1000);
+                accounts.add(acc);
+                System.out.println("恭喜您注册成功，您的账号是："+acc.getCardId());
+                System.out.println("您的初始余额是1000.0元~");
+
+                String url="jdbc:mysql://127.0.0.1:3306/kaohe";
+                String username="root";
+                String password="123456";
+                Connection conn= DriverManager.getConnection(url,username,password);
+                String sql="insert into t_account(card_id,user_name,pass_word,email,introduction,money) values(?,?,?,?,?,?);";
+                PreparedStatement pstmt=conn.prepareStatement(sql);
+                pstmt.setString(1,acc.getCardId());
+                pstmt.setString(2,acc.getUserName());
+                pstmt.setString(3,acc.getPassWord());
+                pstmt.setString(4,acc.getEmail());
+                pstmt.setString(5,acc.getIntroduction());
+                pstmt.setDouble(6,acc.getMoney());
+                int count=pstmt.executeUpdate();
+                System.out.println(count>0);
+                pstmt.close();
+                conn.close();
                 break;
             }else{
                 System.out.println("两次输入的密码不同，请重新输入~");
             }
         }
 
-        acc.setCardId(createCardId());
-
-        acc.setMoney(1000);
-
-        accounts.add(acc);
-        System.out.println("恭喜您注册成功，您的账号是："+acc.getCardId());
-        System.out.println("您的初始余额是1000.0元~");
     }
 
 //获取账号
