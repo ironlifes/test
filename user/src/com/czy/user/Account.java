@@ -1,4 +1,4 @@
-package com.czy;
+package com.czy.user;
 
 public class Account {
     private String cardId;
@@ -67,4 +67,5 @@ public class Account {
     public void setMoney(double money) {
         this.money = money;
     }
+
 }
